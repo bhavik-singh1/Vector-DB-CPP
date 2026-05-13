@@ -138,7 +138,7 @@ uint64_t StorageManager::insert_record(const std::vector<float>& vec, const std:
 
     // 1. Write to WAL first (Durability)
     // For simplicity, we log the vector. In production, log metadata too.
-    wal.append(WALOp::INSERT, id, vec.data(), vec.size() * sizeof(float));
+    wal.append(WALOp::OP_INSERT, id, vec.data(), vec.size() * sizeof(float));
 
     // 2. Update Metadata File (Append-only)
     DWORD bytesWritten;

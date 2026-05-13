@@ -1,4 +1,5 @@
 #include "Core/VectorDB.h"
+#include <iostream>
 
 VectorDB::VectorDB(int d) : kdt(d), hnsw(16, 200), dims(d) {
     StorageManager::Config cfg;

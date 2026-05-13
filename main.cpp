@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <fstream>
 
 #include "Core/VectorDB.h"
 #include "Core/DocumentDB.h"
@@ -79,6 +80,17 @@ int main() {
 
     svr.Options(".*", [](const httplib::Request&, httplib::Response& res) {
         cors(res); res.status = 204;
+    });
+
+    svr.Get("/", [](const httplib::Request&, httplib::Response& res) {
+        std::ifstream ifs("index.html");
+        if (ifs.good()) {
+            std::string html((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+            res.set_content(html, "text/html");
+        } else {
+            res.status = 404;
+            res.set_content("index.html not found", "text/plain");
+        }
     });
 
     svr.Get("/items", [&](const httplib::Request&, httplib::Response& res) {
@@ -216,6 +228,11 @@ int main() {
         if (qEmb.empty()) { res.set_content("{\"error\":\"Ollama error\"}", "application/json"); return; }
 
         auto hits = docDB.search(qEmb, k);
+        if (hits.empty()) {
+            res.set_content("{\"answer\":\"I don't have any documents in my database yet to answer that! Please add some text in the 'DOCUMENTS' tab first.\",\"contexts\":[]}", "application/json");
+            return;
+        }
+
         std::string context = "";
         std::string ctxJson = "[";
         for (size_t i = 0; i < hits.size(); i++) {

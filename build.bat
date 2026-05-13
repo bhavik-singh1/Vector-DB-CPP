@@ -25,7 +25,7 @@ if "%1"=="test" (
 
 :: Compile
 echo [1/2] Compiling sources...
-g++ -std=c++17 -O2 -D_WIN32_WINNT=0x0A00 main.cpp src/Algorithms/KDTree.cpp src/Algorithms/HNSW.cpp src/Ollama/OllamaClient.cpp src/Core/VectorDB.cpp src/Core/DocumentDB.cpp StorageManager.cpp -o db -Iinclude -lws2_32
+g++ -std=c++17 -O2 -D_WIN32_WINNT=0x0A00 main.cpp src/Algorithms/KDTree.cpp src/Algorithms/HNSW.cpp src/Ollama/OllamaClient.cpp src/Core/VectorDB.cpp src/Core/DocumentDB.cpp src/Core/StorageManager.cpp -o db -Iinclude -lws2_32
 
 if %ERRORLEVEL% equ 0 (
     echo [2/2] Build successful: db.exe
@@ -36,4 +36,3 @@ if %ERRORLEVEL% equ 0 (
 )
 
 echo ========================================
-pause

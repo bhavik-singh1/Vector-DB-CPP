@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <cstdint>
 
 // Ensure strict alignment for cross-platform/binary compatibility
 #pragma pack(push, 1)
@@ -36,9 +37,9 @@ struct RecordHeader {
 #pragma pack(pop)
 
 enum class WALOp : uint8_t {
-    INSERT = 0,
-    DELETE = 1,
-    UPDATE_GRAPH = 2
+    OP_INSERT = 0,
+    OP_DELETE = 1,
+    OP_UPDATE_GRAPH = 2
 };
 
 #pragma pack(push, 1)
@@ -103,4 +104,6 @@ private:
     void loadExistingDatabase();
     void recover_from_wal();
     void ensure_capacity(uint64_t record_count);
+    float* get_vector(uint64_t internal_id);
+    RecordHeader* get_header(uint64_t internal_id);
 };
