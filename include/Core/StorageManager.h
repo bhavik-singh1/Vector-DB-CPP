@@ -81,6 +81,9 @@ public:
     uint64_t insert_record(const std::vector<float>& vec, const std::string& metadata);
     void flush_superblock();
 
+    uint64_t get_record_count() const { return sb.total_records; }
+    void get_record(uint64_t id, std::vector<float>& vec, std::string& metadata);
+
 private:
     std::string basePath;
     NebulaSuperblock sb;

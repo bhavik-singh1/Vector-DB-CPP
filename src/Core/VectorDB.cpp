@@ -1,14 +1,51 @@
 #include "Core/VectorDB.h"
 
-VectorDB::VectorDB(int d) : kdt(d), hnsw(16, 200), dims(d) {}
+VectorDB::VectorDB(int d) : kdt(d), hnsw(16, 200), dims(d) {
+    StorageManager::Config cfg;
+    cfg.dim = d;
+    cfg.metric = 1; // Cosine
+    storage.initialize("nebula_data", cfg);
+
+    // Load existing records
+    auto dist = getDistFn("cosine");
+    uint64_t count = storage.get_record_count();
+    std::cout << "Loading " << count << " records from disk..." << std::endl;
+    
+    for (uint64_t i = 0; i < count; i++) {
+        try {
+            std::vector<float> emb;
+            std::string rawMeta;
+            storage.get_record(i, emb, rawMeta);
+
+            // Split meta|cat
+            size_t sep = rawMeta.find('|');
+            std::string meta = (sep != std::string::npos) ? rawMeta.substr(0, sep) : rawMeta;
+            std::string cat = (sep != std::string::npos) ? rawMeta.substr(sep + 1) : "unknown";
+
+            VectorItem v{(int)i, meta, cat, emb};
+            store[v.id] = v;
+            bf.insert(v); kdt.insert(v); hnsw.insert(v, dist);
+            if (v.id >= nextId) nextId = v.id + 1;
+        } catch (...) {
+            std::cerr << "Failed to load record " << i << std::endl;
+        }
+    }
+}
 
 int VectorDB::insert(const std::string& meta, const std::string& cat,
            const std::vector<float>& emb, DistFn dist)
 {
     std::lock_guard<std::mutex> lk(mu);
-    VectorItem v{nextId++, meta, cat, emb};
+    
+    // 1. Persist to Disk
+    uint64_t diskId = storage.insert_record(emb, meta + "|" + cat);
+
+    // 2. Update In-Memory Indices
+    VectorItem v{(int)diskId, meta, cat, emb};
     store[v.id] = v;
     bf.insert(v); kdt.insert(v); hnsw.insert(v, dist);
+    
+    if (v.id >= nextId) nextId = v.id + 1;
     return v.id;
 }
 

@@ -1,4 +1,4 @@
-#include "StorageManager.h"
+#include "Core/StorageManager.h"
 #include <iostream>
 
 // =====================================================================
@@ -192,6 +192,21 @@ void StorageManager::flush_superblock() {
     DWORD written;
     SetFilePointer(hRecords, 0, NULL, FILE_BEGIN);
     WriteFile(hRecords, &sb, sizeof(sb), &written, NULL);
+}
+
+void StorageManager::get_record(uint64_t id, std::vector<float>& vec, std::string& metadata) {
+    if (id >= sb.next_record_id) throw std::runtime_error("Invalid record ID");
+    
+    RecordHeader* header = get_header(id);
+    float* vecPtr = get_vector(id);
+    
+    vec.assign(vecPtr, vecPtr + sb.vector_dim);
+    
+    // Read metadata from file
+    metadata.resize(header->metadata_len);
+    SetFilePointer(hMetadata, (LONG)header->metadata_offset, NULL, FILE_BEGIN);
+    DWORD read;
+    ReadFile(hMetadata, &metadata[0], header->metadata_len, &read, NULL);
 }
 
 float* StorageManager::get_vector(uint64_t internal_id) {

@@ -166,6 +166,7 @@ button {
   <span class="badge">KD-TREE</span>
   <span class="badge">BRUTE FORCE</span>
   <span class="badge" id="ollamaBadge">OLLAMA…</span>
+  <span class="badge" id="diskBadge">DISK…</span>
   <span id="statsLabel">loading…</span>
 </header>
 
@@ -642,7 +643,11 @@ async function checkOllamaStatus() {
   try {
     const r=await fetch(API+'/status'), d=await r.json();
     const badge=document.getElementById('ollamaBadge');
+    const diskBadge=document.getElementById('diskBadge');
     const box=document.getElementById('ollamaStatus');
+    if (d.persistence) {
+      diskBadge.className='badge ok'; diskBadge.textContent='DISK ✓';
+    }
     if (d.ollamaAvailable) {
       badge.className='badge ok'; badge.textContent='OLLAMA ✓';
       box.className='ollama-status ok';

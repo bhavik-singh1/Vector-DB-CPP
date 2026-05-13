@@ -162,6 +162,7 @@ int main() {
         cors(res);
         bool up = ollama.isAvailable();
         res.set_content("{\"ollamaAvailable\":" + std::string(up?"true":"false") +
+                        ",\"persistence\":true" +
                         ",\"embedModel\":" + jS(ollama.embedModel) +
                         ",\"genModel\":" + jS(ollama.genModel) +
                         ",\"docCount\":" + std::to_string(docDB.size()) +

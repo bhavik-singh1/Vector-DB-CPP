@@ -6,12 +6,14 @@
 #include "Algorithms/BruteForce.h"
 #include "Algorithms/KDTree.h"
 #include "Algorithms/HNSW.h"
+#include "Core/StorageManager.h"
 
 class VectorDB {
     std::unordered_map<int, VectorItem> store;
     BruteForce bf;
     KDTree     kdt;
     HNSW       hnsw;
+    StorageManager storage;
     std::mutex mu;
     int nextId = 1;
 
